@@ -1,4 +1,10 @@
 require("dotenv").config();
+const dns = require("dns");
+
+// Override DNS servers to use Google DNS to fix SRV resolution issues in some environments
+if (process.env.NODE_ENV !== "production") {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
@@ -19,7 +25,7 @@ function getMongoUri() {
 
   // Replace cluster host with your Atlas cluster URL
   const clusterHost =
-    process.env.DB_CLUSTER_HOST || "cluster0.xxxxx.mongodb.net";
+    process.env.DB_CLUSTER_HOST || "cluster0.ctcyekk.mongodb.net";
 
   return `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${clusterHost}/?retryWrites=true&w=majority&appName=Cluster0`;
 }
