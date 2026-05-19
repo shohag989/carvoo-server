@@ -21,8 +21,8 @@ function verifyToken(req, res, next) {
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res
-        .status(403)
-        .send({ message: "Forbidden: invalid or expired token" });
+        .status(401)
+        .send({ message: "Unauthorized: invalid or expired token" });
     }
 
     // Routes can read logged-in user data from req.user
