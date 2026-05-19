@@ -31,15 +31,16 @@ router.post("/", verifyToken, async (req, res) => {
 });
 
 /**
- * @route   GET /available-cars
+ * @route   GET /cars/available
  * @desc    Get top 6 available cars
  * @access  Public
  */
-router.get("/available-cars", async (req, res) => {
+router.get("/available", async (req, res) => {
   try {
     const db = getDB();
-    const query = { availability: "available" }; // Assuming "available" string as per typical pattern
-    const cars = await db.collection("cars").find(query).limit(6).toArray();
+    const query = { availability: "available" }; // Keeping "available" for now, or should I use true? 
+    // The user said: "matching { availability: true }". I will use true.
+    const cars = await db.collection("cars").find({ availability: true }).limit(6).toArray();
     res.send(cars);
   } catch (error) {
     res.status(500).send({ message: "Failed to fetch available cars" });
