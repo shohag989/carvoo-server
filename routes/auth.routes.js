@@ -11,11 +11,26 @@ function getCookieOptions() {
 
   return {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction || true, // Force true if frontend is on different domain (HTTPS required for 'none')
+    sameSite: "none",
     path: "/",
   };
 }
+
+// POST /jwt — Create JWT token and store in cookie
+router.post("/jwt", async (req, res) => {
+  const user = req.body;
+  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1h",
+  });
+
+  res
+    .cookie("access_token", token, {
+      ...getCookieOptions(),
+      maxAge: 365 * 24 * 60 * 60 * 1000, // Long-lived for this specific requirement
+    })
+    .send({ success: true });
+});
 
 // POST /jwt-login — check email/password and return JWT in httpOnly cookie
 router.post("/jwt-login", async (req, res) => {  const { email, password } = req.body;
