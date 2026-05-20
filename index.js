@@ -37,6 +37,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://carvoo-byshohag.vercel.app",
   "https://carvoo-byshohag.vercel.app/",
+  "https://carvoo-server.vercel.app",
 ];
 
 // CORS configuration - deployment ready
