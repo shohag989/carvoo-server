@@ -48,18 +48,22 @@ router.get("/available", async (req, res) => {
 });
 
 /**
- * @route   GET /my-cars
- * @desc    Get cars added by the logged-in user
- * @access  Protected
+ * @route   GET /cars/my-cars
+ * @desc    Get cars added by the logged-in user (filtered by ownerEmail query)
+ * @access  Public
  */
-router.get("/my-cars", verifyToken, async (req, res) => {
+router.get("/my-cars", async (req, res) => {
   try {
     const db = getDB();
-    const email = req.user.email;
-    const cars = await db.collection("cars").find({ ownerEmail: email }).toArray();
-    res.send(cars);
+    const email = req.query.ownerEmail;
+    if (!email) {
+      return res.status(400).json({ message: "Owner email is required" });
+    }
+    // Querying the cars collection matching the owner's email
+    const userCars = await db.collection("cars").find({ ownerEmail: email }).toArray();
+    res.json(userCars);
   } catch (error) {
-    res.status(500).send({ message: "Failed to fetch your cars" });
+    res.status(500).json({ message: error.message });
   }
 });
 
