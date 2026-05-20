@@ -3,10 +3,10 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const { connectDB } = require("./config/db");
-const authRoutes = require("./routes/auth.routes");
-const carsRoutes = require("./routes/cars.routes");
-const bookingsRoutes = require("./routes/bookings.routes");
+const { connectDB } = require("../config/db");
+const authRoutes = require("../routes/auth.routes");
+const carsRoutes = require("../routes/cars.routes");
+const bookingsRoutes = require("../routes/bookings.routes");
 
 // Stop early if required .env values are missing
 function validateEnv() {
