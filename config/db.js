@@ -36,25 +36,38 @@ async function connectDB() {
     return db;
   }
 
-  const uri = getMongoUri();
+  try {
+    const uri = getMongoUri();
+    console.log("Attempting to connect to MongoDB...");
 
-  client = new MongoClient(uri, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    },
-  });
+    client = new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+    });
 
-  await client.connect();
+    await client.connect();
 
-  // Ping confirms Atlas connection is working
-  await client.db("admin").command({ ping: 1 });
-  console.log("Connected to MongoDB (Carvoo)");
+    // Ping confirms Atlas connection is working
+    await client.db("admin").command({ ping: 1 });
+    console.log("Successfully connected to MongoDB Atlas (Carvoo)");
 
-  const dbName = process.env.DB_NAME || "carvoo";
-  db = client.db(dbName);
-  return db;
+    const dbName = process.env.DB_NAME || "carvoo";
+    db = client.db(dbName);
+    return db;
+  } catch (error) {
+    console.error("CRITICAL: MongoDB connection failed!");
+    console.error("Error Message:", error.message);
+    console.error("Stack Trace:", error.stack);
+    
+    // Reset state so next request can retry connection
+    db = null;
+    client = null;
+    
+    throw error; // Rethrow to let the middleware handle the 500 response
+  }
 }
 function getDB() {
   if (!db) {
