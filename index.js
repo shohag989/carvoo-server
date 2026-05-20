@@ -35,7 +35,8 @@ const port = process.env.PORT || 5000;
 // List of allowed origins - add your Vercel deployment URLs here
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://carvoo.vercel.app", // Example placeholder for future deployment
+  "https://carvoo-byshohag.vercel.app",
+  "https://carvoo-byshohag.vercel.app/",
 ];
 
 // CORS configuration - deployment ready
@@ -58,6 +59,17 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// Add a middleware to ensure DB is connected before handling requests (for Serverless)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("DB connection error in middleware:", error);
+    res.status(500).send("Internal Server Error: Database connection failed");
+  }
+});
+
 // Health check — useful to confirm the server is running
 app.get("/", (req, res) => {
   res.send("Carvoo API is running 🚗");
@@ -68,14 +80,13 @@ app.use("/", authRoutes);
 app.use("/cars", carsRoutes);
 app.use("/bookings", bookingsRoutes);
 
-// Start server after database connection
-connectDB()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`Carvoo server listening on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Failed to connect to MongoDB:", error);
-    process.exit(1);
+// Export for Vercel
+module.exports = app;
+
+// Only start the server locally if NOT in production
+if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 5000;
+  app.listen(port, () => {
+    console.log(`Carvoo server listening locally on port ${port}`);
   });
+}
