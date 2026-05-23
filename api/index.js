@@ -36,6 +36,7 @@ const port = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:5173",
   "https://carvoo-byshohag.vercel.app",
+  "https://carvoo-server.vercel.app",
   "https://carvoo-byshohag-client.vercel.app",
   "https://carvoo-byshohag-server.vercel.app",
 ];
