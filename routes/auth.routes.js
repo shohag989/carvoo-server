@@ -7,11 +7,9 @@ const router = express.Router();
 
 // Same options for set and clear cookie (logout must match login)
 function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production";
-
   return {
     httpOnly: true,
-    secure: isProduction || true, // Force true if frontend is on different domain (HTTPS required for 'none')
+    secure: true, // Secure must be true for sameSite: "none"
     sameSite: "none",
     path: "/",
   };
@@ -19,17 +17,26 @@ function getCookieOptions() {
 
 // POST /jwt — Create JWT token and store in cookie
 router.post("/jwt", async (req, res) => {
-  const user = req.body;
-  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
-  });
+  try {
+    const user = req.body;
+    if (!user || !user.email) {
+      return res.status(400).send({ message: "Invalid user data" });
+    }
+    
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "365d", // Keeping the long-lived requirement
+    });
 
-  res
-    .cookie("access_token", token, {
-      ...getCookieOptions(),
-      maxAge: 365 * 24 * 60 * 60 * 1000, // Long-lived for this specific requirement
-    })
-    .send({ success: true });
+    res
+      .cookie("access_token", token, {
+        ...getCookieOptions(),
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      })
+      .send({ success: true });
+  } catch (error) {
+    console.error("JWT creation error:", error);
+    res.status(500).send({ message: "Failed to create token" });
+  }
 });
 
 // POST /jwt-login — check email/password and return JWT in httpOnly cookie
