@@ -38,8 +38,7 @@ router.post("/", verifyToken, async (req, res) => {
 router.get("/available", async (req, res) => {
   try {
     const db = getDB();
-    const query = { availability: "available" }; // Keeping "available" for now, or should I use true? 
-    // The user said: "matching { availability: true }". I will use true.
+    // Standardizing to boolean true for available cars
     const cars = await db.collection("cars").find({ availability: true }).limit(6).toArray();
     res.send(cars);
   } catch (error) {
@@ -49,21 +48,19 @@ router.get("/available", async (req, res) => {
 
 /**
  * @route   GET /cars/my-cars
- * @desc    Get cars added by the logged-in user (filtered by ownerEmail query)
- * @access  Public
+ * @desc    Get cars added by the logged-in user
+ * @access  Protected
  */
-router.get("/my-cars", async (req, res) => {
+router.get("/my-cars", verifyToken, async (req, res) => {
   try {
     const db = getDB();
-    const email = req.query.ownerEmail;
-    if (!email) {
-      return res.status(400).json({ message: "Owner email is required" });
-    }
-    // Querying the cars collection matching the owner's email
+    const email = req.user.email; // Use email from verified token
+    
+    // Querying the cars collection matching the owner's email from token
     const userCars = await db.collection("cars").find({ ownerEmail: email }).toArray();
     res.json(userCars);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Failed to fetch your cars" });
   }
 });
 
